@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#10231f"><meta name="description" content="Smart Study Planner — adaptive planning, CEC internals and subject strength tracking.">
+<title>Smart Study Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="style.css"><!-- fallback if the files are in one flat folder -->
+</head>
+<body>
+<div class="app">
+<aside class="sidebar" id="sidebar">
+  <div class="brand"><div class="logo">S</div><div><strong>Smart Study</strong><small>PLANNER</small></div></div>
+  <div class="profileMini" id="profileMini"></div>
+  <nav aria-label="Main navigation">
+    <button class="nav active" data-page="dashboard"><span class="ico">🏠</span><span>Dashboard</span></button>
+    <button class="nav" data-page="planner"><span class="ico">🗓️</span><span>Smart Planner</span></button>
+    <button class="nav" data-page="focus"><span class="ico">🍅</span><span>Pomodoro</span></button>
+    <button class="nav" data-page="subjects"><span class="ico">📚</span><span>Subjects</span></button>
+    <button class="nav" data-page="progress"><span class="ico">📈</span><span>Progress</span></button>
+    <button class="nav cecNav" data-page="cec"><span class="ico">🎯</span><span>CEC Internals</span><em>CORE</em></button>
+    <button class="nav" data-page="materials"><span class="ico">📖</span><span>Study Material</span></button>
+    <button class="nav" data-page="videos"><span class="ico">🎬</span><span>Videos</span></button>
+    <button class="nav" data-page="stimer"><span class="ico">⏱️</span><span>Study Timer</span></button>
+    <button class="nav" data-page="tracker"><span class="ico">🧱</span><span>Tracker</span></button>
+    <button class="nav" data-page="settings"><span class="ico">⚙️</span><span>Settings</span></button>
+  </nav>
+  <div class="tip"><b>SMART TIP</b><p id="tip">Small daily sessions are easier to maintain than last-minute studying.</p></div>
+</aside>
+<main>
+<header>
+  <button class="menuBtn" id="menuBtn" aria-label="Open menu" aria-expanded="false">☰</button>
+  <div class="crumb">Workspace / <strong id="pageTitle">Dashboard</strong></div>
+  <div class="headerRight"><div class="date" id="todayDate"></div><button class="themeToggle" id="themeToggle" title="Toggle theme" aria-label="Toggle light and dark mode"><span id="themeIcon">☾</span></button></div>
+</header>
+
+<section class="page active" id="dashboard">
+  <div class="hero">
+    <div class="heroCopy"><small>YOUR STUDY COMMAND CENTER</small><h1 id="greeting">Good morning, Guest.</h1><p>Turn your available time, deadlines, CEC internals and confidence into a practical study plan.</p><div class="actions"><button class="primary" data-go="planner">Build today's plan →</button><button class="secondary heroSecondary" data-go="cec">Open CEC Command Center</button></div></div>
+    <div class="scoreCircle"><strong id="heroScore">0</strong><span>study score</span></div>
+  </div>
+  <div class="nudge" id="backupNudge" hidden><span>Your data lives only in this browser. Back it up so you never lose it.</span><button class="smallBtn go" data-go="settings">Back up now</button></div>
+  <div class="dashTop"><div class="panel"><div class="panelHead"><div><b>🎯 Today's must-do</b><small>Your own list. Click a line to edit it.</small></div></div><div id="mustDo"></div><div class="mdAdd"><input id="mdNew" maxlength="120" placeholder="Add something you must finish today"><button class="smallBtn go" id="mdAdd">Add</button></div><div class="acts"><button class="smallBtn" id="mdSuggest">Fill from my plan</button><button class="smallBtn" id="mdClear">Clear done</button></div></div>
+  <div class="panel goalPanel"><div class="panelHead"><div><b>🏆 Daily goal</b><small>Minutes from completed sessions</small></div></div><div class="goalTop"><strong id="goalDone">0h 00m</strong><label>of <input id="goalInput" type="number" min="15" max="720" step="15" value="120"> min</label></div><div class="bar"><i id="goalBar"></i></div><p class="muted" id="goalMsg"></p></div></div>
+  <div class="stats">
+    <div class="stat"><i>⏰</i><div><small>Available today</small><b id="hours">2h 00m</b><span id="hoursSub">study time</span></div></div>
+    <div class="stat"><i>✅</i><div><small>Completed</small><b id="done">0</b><span id="planned">of 0 planned</span></div></div>
+    <div class="stat"><i>🎯</i><div><small>CEC overall</small><b id="dashCec">—</b><span id="dashCecSub">Add internal tests</span></div></div>
+    <div class="stat"><i>🔥</i><div><small>Consistency</small><b id="streak">0 days</b><span>active study streak</span></div></div>
+  </div>
+  <div class="sectionHead"><div><small>SMART RECOMMENDATION</small><h2>What should I study now?</h2></div><button class="link" data-go="planner">See full plan →</button></div>
+  <div class="recommend" id="recommend"></div>
+  <div class="columns"><div class="panel"><div class="panelHead"><div><b>Today's timeline</b><small>Priority-ranked sessions + CEC deadlines</small></div><span class="badge" id="sessionCount">0 sessions</span></div><div id="timeline"></div></div><div class="panel"><div class="panelHead"><div><b>Upcoming tests & exams</b><small>Exam dates come from your topics. Tests come from your CEC list.</small></div><div class="acts" style="margin:0"><button class="smallBtn go" id="addTestDash">+ CEC test</button><button class="smallBtn" id="addTopicDash">+ Topic</button></div></div><div id="exams" class="examCards"></div></div></div>
+  <div class="panel weekPanel"><div class="panelHead"><div><b>📅 Your week</b><small>Minutes per day (bars) and the last four weeks (squares)</small></div></div><div class="weekWrap"><div class="weekBars" id="weekBars"></div><div class="heat" id="heat"></div></div></div>
+</section>
+
+<section class="page" id="planner">
+  <div class="heading"><div><h1>Today's study plan 📝</h1><p>Tell us how much time and energy you have. We choose what to study, in what order, and show you why.</p></div><button class="primary big" id="generate">Generate my plan ✨</button></div>
+  <div class="plannerLayout">
+    <div class="planCol"><div class="planSummary" id="planSummary"></div><div id="plan"></div><div class="planFoot"><button class="secondary" id="resetPlan">Clear plan</button></div></div>
+    <aside class="panel controls sticky"><div class="panelHead"><div><b>Today's conditions</b><small>Change these, then press Generate.</small></div></div>
+      <label>Available study time <output id="timeOut">120 min</output></label><input type="range" id="time" min="30" max="480" step="15" value="120"><div class="range"><span>30 min</span><span>8 hours</span></div>
+      <label>Energy / focus level <output id="energyOut">Medium</output></label><div class="choices" id="energy"><button data-v="low">Low</button><button data-v="medium" class="selected">Medium</button><button data-v="high">High</button></div>
+      <label>Planning mode</label><div class="modes" id="modes"><button data-mode="balanced" class="selected"><b>Balanced</b><span>Mix learning, revision and deadlines</span></button><button data-mode="urgent"><b>Deadline first</b><span>Push CEC tests and exams higher</span></button><button data-mode="weak"><b>Weakness first</b><span>Target low-confidence topics</span></button></div>
+      <div id="overrideWrap"></div>
+      <div class="howItWorks"><b>How we choose</b><p>Each topic gets a score from four signals, and every card shows them as chips.</p><div class="chips"><span class="chip">Exam deadlines</span><span class="chip">CEC tests</span><span class="chip">Weak topics</span><span class="chip">Revision gap</span></div></div>
+    </aside>
+  </div>
+</section>
+
+<section class="page" id="subjects">
+  <div class="heading"><div><small>KNOWLEDGE MAP</small><h1>Subjects & topics</h1><p>Track syllabus completion and honest topic confidence. <b>Be honest, this only helps you.</b></p></div><button class="primary" id="addTopic">+ Add subject</button></div>
+  <div class="subjectGrid" id="subjectGrid"></div><div class="emptyState" id="subjectsEmpty" hidden>No topics yet. Add your first topic to start planning.</div>
+</section>
+
+<section class="page" id="progress">
+  <div class="heading"><div><small>STRENGTH VS WEAKNESS</small><h1>Progress & strength</h1><p>Your self-ratings, CEC performance and completed topics combine into a subject strength meter.</p></div></div>
+  <div class="progressGrid"><div class="panel dark"><small>STUDY HEALTH</small><strong id="bigScore">0</strong><p id="scoreMsg">Complete a session to start building your score.</p><div class="bar"><i id="scoreBar"></i></div></div><div class="panel"><div class="panelHead"><div><b>Completion</b><small>Planned vs completed</small></div></div><div class="donut" id="donut"><span id="pct">0%</span></div><p class="center" id="completionText">0 completed tasks</p></div></div>
+  <div class="chartGrid"><div class="panel"><div class="panelHead"><div><b>Subject strength meter</b><small>Higher means stronger overall readiness.</small></div></div><div id="strengthBars"></div></div><div class="panel"><div class="panelHead"><div><b>Weakest subject alert</b><small>A focused action for today.</small></div></div><div id="weakAlert"></div></div></div>
+  <div class="panel"><div class="panelHead"><div><b>Topic confidence</b><small>Rate 1–5 stars. Be honest, this only helps you.</small></div></div><div id="confidence"></div></div>
+</section>
+
+<section class="page" id="cec">
+  <div class="cecHero"><div><small>CEC INTERNAL ASSESSMENT</small><h1>CEC Command Center</h1><p>Track every paper, test and round. Your internal score updates automatically.</p></div><div class="cecHeroStat"><span>Overall internal</span><strong id="cecOverall">—</strong></div></div>
+  <div class="cecGrid"><div class="panel commandCard"><div class="commandTop"><div class="ring" id="cecRing"><span id="cecRingText">—</span></div><div><span class="zone" id="cecZone">NO DATA</span><h2 id="cecInsight">Add your first CEC test.</h2><p id="cecNeed">Your target predictor will appear here.</p></div></div><div class="targetRow"><label>Target internal score <input id="targetScore" type="number" min="1" max="100" value="80"></label><span id="targetHint">Aim for 80%</span></div></div><div class="panel"><div class="panelHead"><div><b>Next CEC test</b><small>Countdown across all subjects</small></div></div><div id="nextCec"></div></div></div>
+  <div class="sectionHead"><div><small>SUBJECT INTERNALS</small><h2>Subject scorecards</h2></div><button class="primary" id="addTest">+ Add CEC test</button></div><div class="cecSubjects" id="cecSubjects"></div>
+  <div class="panel trendPanel"><div class="panelHead"><div><b>Score trend</b><small id="trendLabel">Select a subject to see its test-by-test trend.</small></div><select id="trendSubject" class="sel"></select></div><canvas id="trendCanvas" height="230"></canvas></div>
+</section>
+
+<section class="page" id="materials">
+  <div class="heading"><div><small>KNOWLEDGE LIBRARY</small><h1>Study Material</h1><p>All PDFs, notes and links across your subjects — searchable and opened in the in-app viewer.</p></div><button class="primary" id="addMaterialGlobal">+ Add material</button></div>
+  <div class="toolbar panel"><input id="materialSearch" placeholder="Search notes, PDFs and links…"><select id="materialSubject" class="sel"><option value="all">All subjects</option></select></div><div id="materialLibrary"></div>
+</section>
+
+<section class="page" id="videos">
+  <div class="heading"><div><small>VIDEO LIBRARY</small><h1>Videos</h1><p>Saved YouTube videos and channels grouped by subject, with fast search when you need something new.</p></div><button class="primary" id="addVideoGlobal">+ Save YouTube link</button></div>
+  <div class="toolbar panel"><input id="videoSearch" placeholder="Search saved videos and channels…"><button class="secondary" id="youtubeSearchGlobal">Search on YouTube ↗</button></div><div id="videoLibrary"></div>
+</section>
+
+<section class="page" id="focus">
+  <div class="heading"><div><h1>Pomodoro 🍅</h1><p>Study in short focused rounds, then rest. After every few rounds you get a long break.</p></div></div>
+  <div class="pomoGrid">
+    <div class="panel pomoCard"><div class="choices" id="pomoModes"><button data-pm="focus">🍅 Focus</button><button data-pm="short">☕ Short break</button><button data-pm="long">🌴 Long break</button></div>
+      <div class="pomoRing" id="pomoRing"><div class="pomoInner"><div class="timer" id="timer">25:00</div><div class="pomoDots" id="pomoDots"></div></div></div>
+      <div class="timerActions"><button class="primary big" id="startTimer">Start</button><button class="secondary" id="resetTimer">Reset</button></div><p class="muted center" id="pomoStats"></p></div>
+    <div class="pomoSide">
+      <div class="panel focusCard"><small>You're studying</small><h2 id="focusTask">Generate a plan first</h2><p id="focusReason">Your highest-priority task will appear here.</p><div id="focusExtra"></div><button class="secondary full" id="pomoDone">✅ Mark this session done</button></div>
+      <div class="panel"><b>Quick notes</b><textarea id="pomoNotes" rows="5" placeholder="Jot down questions or ideas so they do not pull you off task"></textarea></div>
+      <div class="panel pomoSet"><b>Timer settings</b><div class="setGrid"><label>Focus (min)<input type="number" min="1" max="120" data-pset="focus"></label><label>Short break<input type="number" min="1" max="120" data-pset="short"></label><label>Long break<input type="number" min="1" max="120" data-pset="long"></label><label>Rounds before long break<input type="number" min="2" max="8" data-pset="every"></label></div><label class="check2"><input type="checkbox" data-pset="auto"> Start the next phase automatically</label><label class="check2"><input type="checkbox" data-pset="sound"> Play a sound when time is up</label></div>
+    </div>
+  </div>
+</section>
+
+<section class="page" id="stimer"><div class="heading"><div><small>TRACK YOUR TIME</small><h1>Study Timer ⏱️</h1><p>Pick what you are working on, press start, and every session is saved.</p></div></div><div class="choices stTabs" id="stTabs"></div><div id="stBody"></div></section>
+<section class="page" id="tracker"><div class="heading"><div><small>DAILY TRACKER</small><h1>24-hour blocks 🧱</h1><p>Each block is one hour of the day. See exactly when you studied.</p></div></div><div id="trBody"></div></section>
+<section class="page" id="settings">
+  <div class="heading"><div><small>PREFERENCES</small><h1>Settings</h1><p>Your planner data stays in this browser.</p></div></div>
+  <div class="settings"><div class="panel profileSettings"><b>Your profile</b><div class="profileEdit"><div class="avatar big" id="settingsAvatar">G</div><div><strong id="settingsNameLabel">Guest</strong><p class="muted">This name appears in your dashboard greeting and sidebar.</p></div></div><input id="name" placeholder="Enter your name" maxlength="40"><div class="acts"><button class="primary" id="saveName">Save profile</button><label class="secondary fileBtn">Upload photo<input id="avatarUpload" type="file" accept="image/*" hidden></label><button class="secondary" id="removeAvatar">Remove photo</button></div></div>
+  <div class="panel"><b>Appearance</b><p class="muted">Choose a theme or follow your device automatically.</p><div class="themeChoices" id="themeChoices"><button data-theme="system">◐ System</button><button data-theme="light">☀ Light</button><button data-theme="dark">☾ Dark</button></div><b class="settingSub">Text size</b><div class="choices" id="textSize"><button data-ts="small">Small</button><button data-ts="medium">Medium</button><button data-ts="large">Large</button></div></div>
+  <div class="panel"><b>Backup</b><p class="muted">Save everything (topics, tests, notes, uploaded files) to one file, or restore from one.</p><p class="muted" id="backupInfo"></p><div class="acts"><button class="primary" id="exportBackup">Download backup</button><label class="secondary fileBtn">Restore backup<input id="importFile" type="file" accept="application/json,.json" hidden></label></div></div>
+  <div class="panel"><b>Demo data</b><p class="muted">Resetting removes local planner data and restores the demo topics and CEC tests.</p><button class="danger" id="clearData">Reset all data</button></div></div>
+</section>
+</main></div>
+
+<div class="modal" id="modal"><div class="modalBox"><button class="close">×</button><small>NEW</small><h2>Add a subject or topic</h2><form id="topicForm"><label>Subject <small class="hint">(pick one or type a new one)</small><input required name="subject" maxlength="50" list="subjectList" autocomplete="off" placeholder="e.g. Mathematics"></label><datalist id="subjectList"></datalist><label>Topic<input required name="topic" maxlength="80" placeholder="e.g. Integration"></label><label>Exam date <small class="hint">(optional)</small><input type="date" name="exam" id="examDateInput"></label><label>Difficulty<select name="difficulty"><option value="1">Easy</option><option value="2" selected>Medium</option><option value="3">Hard</option></select></label><label>Confidence<select name="confidence"><option value="1">Low</option><option value="2" selected>Okay</option><option value="3">Strong</option></select></label><button class="primary full" type="submit">Add topic</button></form></div></div>
+<div class="modal" id="testModal"><div class="modalBox"><button class="close">×</button><small>CEC INTERNAL</small><h2 id="testModalTitle">Add CEC test</h2><form id="testForm"><label>Subject<select name="subject" id="testSubject" required></select></label><label>Test name<input name="name" required maxlength="70" placeholder="e.g. Unit Test 2"></label><label>Date<input name="date" type="date" required></label><label>Max marks<input name="max" type="number" min="1" step="0.5" required placeholder="100"></label><label>Marks obtained <small class="hint">(leave empty if the test is still upcoming)</small><input name="obtained" type="number" min="0" step="0.5" placeholder="78"></label><label>Weightage<input name="weight" type="number" min="0.1" step="0.1" value="1" required></label><button class="primary full" type="submit">Save test</button></form></div></div>
+<div class="modal" id="wsModal"><div class="modalBox wide"><button class="close">×</button><small id="wsSub"></small><h2 id="wsTitle"></h2><label>Subject<select id="wsSubject" class="sel"></select></label><div class="choices" id="wsTabs"><button data-tab="material" class="selected">Study Material</button><button data-tab="videos">Videos</button></div><div id="wsBody" class="wsList"></div></div></div>
+<div class="modal" id="viewer"><div class="modalBox wide"><button class="close">×</button><h2 id="viewerTitle"></h2><div id="viewerBody"></div></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="js/app.js" onerror="var f=document.createElement('script');f.src='app.js';document.body.appendChild(f)"></script>
+<script src="js/timer.js"></script>
+</body></html>
